@@ -52,8 +52,8 @@ object ModuleTransformer {
   }
 }
 
-class ModuleTransformerException(moduleTransformerName: String, cause: Throwable, error: String) extends Exception(cause) {
-  override def toString = moduleTransformerName + " : " + error
+class ModuleTransformerException(moduleTransformerName: String, cause: Throwable) extends Exception(cause) {
+  override def toString = moduleTransformerName + " : " + cause.toString()
 }
 
 /**
@@ -67,19 +67,21 @@ abstract class ModuleTransformer extends (Module => Module) {
   } catch {
     case e: ModuleTransformerException => throw e
     case e: Throwable => {
-//      if(e.toString().contains("Can't mix cells")) {
+      if (e.toString().contains("Can't mix cells")) {
         var error: String = e.toString()
         val sub: String = "Can't mix cells at different levels under a rewrite"
         var pos: Int = error.indexOf(sub)
-        while(error.contains(sub) ) {
+        while (error.contains(sub)) {
           pos = error.indexOf(sub)
-          error = error.substring(0, pos) + "Incomplete rule assignment" + error.substring(pos+51)
+          error = error.substring(0, pos) + "Incomplete rule assignment" + error.substring(pos + 51)
         }
-        throw new ModuleTransformerException(name, e, error)
-//      }
-//      else {
-//        throw new ModuleTransformerException(name, e.toString())
-//      }
+        val newE = new Throwable(error, e)
+        throw new ModuleTransformerException(name, newE)
+      }
+
+      else {
+        throw new ModuleTransformerException(name, e)
+      }
     }
   }
 }
