@@ -37,10 +37,6 @@ public class KRunExecutionMode implements ExecutionMode {
     public Object execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         Rule pattern = null;
         if (kRunOptions.pattern != null) {
-            //Fix the .TaskCellBag bug for issue #2097
-            if(kRunOptions.pattern.equals("<tasks> .TaskCellBag </tasks>")){
-                kRunOptions.pattern = "<tasks> .Bag </tasks>";
-            }
             pattern = KRun.compilePattern(files, kem, kRunOptions.pattern, kRunOptions, compiledDefinition, Source.apply("<command line>"));
         }
         if (kRunOptions.search()) {

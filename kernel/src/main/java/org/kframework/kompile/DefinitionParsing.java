@@ -281,8 +281,8 @@ public class DefinitionParsing {
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         Either<java.util.Set<ParseFailedException>, K> res = performParse(new HashMap<>(), RuleGrammarGenerator.getCombinedGrammar(RuleGrammarGenerator.getRuleGrammar(compiledDef.executionModule(), s -> compiledDef.kompiledDefinition.getModule(s).get()), isStrict),
                 new Bubble("rule", contents, Att().add("contentStartLine", 1).add("contentStartColumn", 1).add("Source", source.source())));
-
         if (res.isLeft()) {
+            System.out.println("gonna throw in parseRule due to res.isLeft() is ParseFailedException " + " contents: " + contents);
             throw res.left().get().iterator().next();
         }
         return upRule(res.right().get());
@@ -357,7 +357,11 @@ public class DefinitionParsing {
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Right.apply(parse.getParse());
         } else {
-            result = parser.parseString(b.contents(), START_SYMBOL, Source.apply(source), startLine, startColumn);
+            //Fix the .TaskCellBag bug for issue #2097
+            if(b.contents().equals("<tasks> .TaskCellBag </tasks>"))
+                result = parser.parseString("<tasks> .Bag </tasks>", START_SYMBOL, Source.apply(source), startLine, startColumn);
+            else
+                result = parser.parseString(b.contents(), START_SYMBOL, Source.apply(source), startLine, startColumn);
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
