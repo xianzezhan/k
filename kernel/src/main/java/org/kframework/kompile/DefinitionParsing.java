@@ -282,6 +282,7 @@ public class DefinitionParsing {
         Either<java.util.Set<ParseFailedException>, K> res = performParse(new HashMap<>(), RuleGrammarGenerator.getCombinedGrammar(RuleGrammarGenerator.getRuleGrammar(compiledDef.executionModule(), s -> compiledDef.kompiledDefinition.getModule(s).get()), isStrict),
                 new Bubble("rule", contents, Att().add("contentStartLine", 1).add("contentStartColumn", 1).add("Source", source.source())));
         if (res.isLeft()) {
+            //System.out.println("gonna throw in parseRule due to res.isLeft() is ParseFailedException " + " contents: " + contents);
             throw res.left().get().iterator().next();
         }
         return upRule(res.right().get());
@@ -350,6 +351,7 @@ public class DefinitionParsing {
         int startColumn = b.att().<Integer>get("contentStartColumn").get();
         String source = b.att().<String>get("Source").get();
         Tuple2<Either<java.util.Set<ParseFailedException>, K>, java.util.Set<ParseFailedException>> result;
+       // System.out.println("b contents: " + b.contents().toString());
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
             cachedBubbles.getAndIncrement();
@@ -361,14 +363,17 @@ public class DefinitionParsing {
                 result = parser.parseString("<tasks> .Bag </tasks>", START_SYMBOL, Source.apply(source), startLine, startColumn);
             else
                 result = parser.parseString(b.contents(), START_SYMBOL, Source.apply(source), startLine, startColumn);
+            //System.out.println("result is: " + result.toString());
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+            //System.out.println("result is: " + result.toString());
             if (result._1().isRight()) {
                 KApply k = (KApply) TreeNodesToKORE.down(result._1().right().get());
                 k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove("Source").remove("Location")));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Right.apply(k);
             } else {
+                //System.out.println("hello 4 ");
                 return Left.apply(result._1().left().get());
             }
         }
