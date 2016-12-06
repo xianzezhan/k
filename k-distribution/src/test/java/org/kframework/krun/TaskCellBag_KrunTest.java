@@ -24,7 +24,7 @@ public class TaskCellBag_KrunTest extends AbstractTest {
     private String fileName;
     private KRunOptions kRunOptions;
     private String pgm;
-
+    private KRun mykrun;
 
     @Before
     public void setup() throws URISyntaxException, IOException {
@@ -32,6 +32,7 @@ public class TaskCellBag_KrunTest extends AbstractTest {
         fileName = "/convertor-tests/simple-typed-static.k";
         utils = new KoreUtils(fileName, "SIMPLE-TYPED-STATIC", "SIMPLE-TYPED-STATIC-SYNTAX", kem);
         trans = new KtoKORE();
+        mykrun=new KRun();
         pgm= "int factorial(int y) {\n" +
                 "  print(\"Factorial of \", y, \" is: \");\n" +
                 "  int t=1;\n" +
@@ -60,8 +61,8 @@ public class TaskCellBag_KrunTest extends AbstractTest {
         FileUtil files = FileUtil.get(globalOptions, System.getenv());
         Kapi kapi = new Kapi();
         RewriterResult result = kapi.krun(pgm, null, utils.compiledDef);
-        KRun.prettyPrint(utils.compiledDef, krunOptions.output, s -> KRun.outputFile(s, krunOptions, files), result.k());
-
+        //KRun.prettyPrint(utils.compiledDef, krunOptions.output, s -> KRun.outputFile(s, krunOptions, files), result.k());
+        mykrun.printK(result.k(),krunOptions,utils.compiledDef);
         // check result
         String outstr = baos.toString();
         System.out.println(outstr);
