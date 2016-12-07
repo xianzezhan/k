@@ -373,7 +373,6 @@ public class DefinitionParsing {
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Right.apply(k);
             } else {
-                //System.out.println("hello 4 ");
                 return Left.apply(result._1().left().get());
             }
         }
